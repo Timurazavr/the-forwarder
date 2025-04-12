@@ -18,7 +18,7 @@ async def code_complete(message: Message):
     try:
         result_code = "return 0"
         try:
-            exec(message.text[6:])
+            exec(message.text.strip("/code_exec "))
         except Exception as err:
             result_code = err
         await message.answer(text=str(result_code))
@@ -32,7 +32,7 @@ async def code_complete(message: Message):
     try:
         result_code = "return 0"
         try:
-            result_code = eval(message.text[6:])
+            result_code = eval(message.text.strip("/code_eval "))
         except Exception as err:
             result_code = err
         await message.answer(text=str(result_code))
