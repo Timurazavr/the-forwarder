@@ -1,7 +1,7 @@
 from aiogram import F, Router, Bot
 from aiogram.types import Message, FSInputFile
 from secret import ADMIN_IDS, BOT_ID
-from databases.database import add_client, sql_changes, sql_request
+from databases.database import *
 from services.service import history_dict, History
 from aiogram.exceptions import AiogramError
 import logging
@@ -13,12 +13,26 @@ router.message.filter(F.from_user.id.in_(ADMIN_IDS))
 logger = logging.getLogger(__name__)
 
 
-@router.message(F.text.startswith("/code "))
+@router.message(F.text.startswith("/code_exec "))
 async def code_complete(message: Message):
     try:
         result_code = "return 0"
         try:
             exec(message.text[6:])
+        except Exception as err:
+            result_code = err
+        await message.answer(text=str(result_code))
+    except Exception as err:
+        logger.error(str(err))
+        logger.error(message.model_dump_json(exclude_none=True))
+
+
+@router.message(F.text.startswith("/code_eval "))
+async def code_complete(message: Message):
+    try:
+        result_code = "return 0"
+        try:
+            result_code = eval(message.text[6:])
         except Exception as err:
             result_code = err
         await message.answer(text=str(result_code))
@@ -99,7 +113,7 @@ async def change_complete(message: Message):
 async def change_complete(message: Message):
     try:
         await message.answer(
-            text="/code ''\n/add 'group_id' 'channel_id'\n/sql_req ''\n/sql_che ''"
+            text="/code_(eval | exec) ''\n/add 'group_id' 'channel_id'\n/sql_req ''\n/sql_che ''"
         )
     except Exception as err:
         logger.error(str(err))
